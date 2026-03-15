@@ -3,7 +3,7 @@ const myUserId = localStorage.getItem("userId");
 const myName = localStorage.getItem("name");
 const myEmail = localStorage.getItem("email");
 
-const socket = io("http://localhost:3000", {
+const socket = io("https://group-chat-app-ready.onrender.com", {
   auth: { token }
 });
 

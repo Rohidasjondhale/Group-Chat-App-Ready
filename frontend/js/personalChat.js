@@ -1,5 +1,5 @@
 // Connect to socket server
-const socket = io("http://localhost:3000");
+const socket = io("https://group-chat-app-ready.onrender.com");
 
 // Logged-in user email
 const myEmail = localStorage.getItem("email");
