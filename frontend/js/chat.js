@@ -3,11 +3,14 @@ const myUserId = localStorage.getItem("userId");
 const myName = localStorage.getItem("name");
 const myEmail = localStorage.getItem("email");
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 const socket = io("https://group-chat-app-ready.onrender.com", {
   auth: { token }
 });
+
+let currentGroup = "";
+let currentRoom = "";
+
+/* SOCKET EVENTS */
 
 socket.on("receive_group_message", (data) => {
   displayMessage(data);
@@ -18,10 +21,7 @@ socket.on("receive_message", (data) => {
 });
 
 
-let currentGroup = "";
-let currentRoom = "";
-
-//JOIN GROUP
+/* JOIN GROUP */
 
 function joinGroup(){
 
@@ -38,36 +38,32 @@ function joinGroup(){
 
   socket.emit("join_group", groupName);
 
-  alert("Joined group successfully: " + groupName);
+  alert("Joined group: " + groupName);
 
-  console.log("Joined group:", groupName);
-
-  groupInput.value = "";
+  groupInput.value="";
 }
 
 
+/* JOIN PERSONAL CHAT */
 
-
-//JOIN PERSONAL CHAT
-
-async function joinRoom() {
+async function joinRoom(){
 
   const email = document
     .getElementById("searchEmail")
     .value
     .trim();
 
-  if (!email) {
+  if(!email){
     alert("Enter email");
     return;
   }
 
-  try {
+  try{
 
     const res = await fetch(`https://group-chat-app-ready.onrender.com/search-user?email=${email}`);
     const data = await res.json();
 
-    if (!data.user) {
+    if(!data.user){
       alert("User not found");
       return;
     }
@@ -83,49 +79,23 @@ async function joinRoom() {
 
     socket.emit("join_room", roomId);
 
-    alert("Chat started with: " + otherEmail);
+    alert("Chat started with " + otherEmail);
 
-    console.log("Joined room:", roomId);
+  }catch(err){
 
-  } catch (err) {
     console.log(err);
     alert("Error joining chat");
+
   }
 
 }
 
 
-//SEND MESSAGE
+/* SEND MESSAGE */
 
 async function send(){
 
   const input = document.getElementById("messageInput");
-
-input.addEventListener("input", async () => {
-
-  const text = input.value;
-
-  if(text.length < 3) return;
-
-  const res = await fetch("https://group-chat-app-ready.onrender.com/ai/predict",{
-
-    method:"POST",
-
-    headers:{
-      "Content-Type":"application/json"
-    },
-
-    body:JSON.stringify({ text })
-
-  });
-
-  const suggestions = await res.json();
-
-  showSuggestions(suggestions);
-
-});
-
-
   const fileInput = document.getElementById("mediaFile");
 
   const message = input.value.trim();
@@ -133,7 +103,8 @@ input.addEventListener("input", async () => {
 
   let finalMessage = message;
 
-  /* FILE SELECTED */
+  /* FILE UPLOAD */
+
   if(file){
 
     const formData = new FormData();
@@ -148,11 +119,12 @@ input.addEventListener("input", async () => {
 
     finalMessage = data.url;
 
-    fileInput.value = "";
+    fileInput.value="";
+
   }
 
   if(!finalMessage){
-    alert("Enter message or choose file");
+    alert("Enter message or upload file");
     return;
   }
 
@@ -176,12 +148,19 @@ input.addEventListener("input", async () => {
 
   }
 
+  else{
+
+    alert("Join group or chat first");
+    return;
+
+  }
+
   input.value="";
+
 }
 
 
-
-//DISPLAY MESSAGE
+/* DISPLAY MESSAGE */
 
 function displayMessage(data){
 
@@ -191,12 +170,9 @@ function displayMessage(data){
 
   messageDiv.classList.add("message");
 
-  // RIGHT SIDE (my message)
   if(String(data.senderId) === String(myUserId)){
     messageDiv.classList.add("sent");
-  }
-  // LEFT SIDE (other user)
-  else{
+  }else{
     messageDiv.classList.add("received");
   }
 
@@ -207,10 +183,8 @@ function displayMessage(data){
     if(url.match(/\.(jpg|jpeg|png|gif)$/i)){
 
       messageDiv.innerHTML =
-`<b>${data.senderName}</b><br>
-<a href="${url}" download class="file-link">
-⬇️ Download
-</a>`;
+      `<b>${data.senderName}</b><br>
+      <img src="${url}" width="200">`;
 
     }
 
@@ -218,7 +192,7 @@ function displayMessage(data){
 
       messageDiv.innerHTML =
       `<b>${data.senderName}</b><br>
-      <video controls src="${url}" style="max-width:200px"></video>`;
+      <video controls src="${url}" width="200"></video>`;
 
     }
 
@@ -226,11 +200,12 @@ function displayMessage(data){
 
       messageDiv.innerHTML =
       `<b>${data.senderName}</b><br>
-      <a href="${url}" target="_blank">📄 Download File</a>`;
+      <a href="${url}" target="_blank">Download File</a>`;
 
     }
 
   }
+
   else{
 
     messageDiv.innerHTML = `<b>${data.senderName}</b>: ${data.message}`;
@@ -240,8 +215,11 @@ function displayMessage(data){
   messageContainer.appendChild(messageDiv);
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
+
 }
 
+
+/* FILE NAME */
 
 function showFileName(){
 
@@ -250,45 +228,21 @@ function showFileName(){
 
   if(fileInput.files.length > 0){
     fileNameDisplay.textContent = fileInput.files[0].name;
-  } else{
+  }else{
     fileNameDisplay.textContent = "";
   }
 
 }
 
-function showSuggestions(words){
 
-  const box = document.getElementById("suggestions");
-
-  box.innerHTML = "";
-
-  words.forEach(word => {
-
-    const btn = document.createElement("button");
-
-    btn.innerText = word;
-
-    btn.onclick = () => {
-      document.getElementById("messageInput").value += " " + word;
-    };
-
-    box.appendChild(btn);
-
-  });
-
-}
-
+/* ENTER TO SEND */
 
 document
 .getElementById("messageInput")
-.addEventListener("keypress", function(e){
+.addEventListener("keypress",function(e){
 
   if(e.key === "Enter"){
     send();
   }
 
 });
-
-
-
-
