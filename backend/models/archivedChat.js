@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../config/database");
 
-const ArchivedChat = sequelize.define("ArchivedChat", {
+const ArchivedChat = sequelize.define("archivedChat", {
   message: {
     type: Sequelize.TEXT,
     allowNull: false

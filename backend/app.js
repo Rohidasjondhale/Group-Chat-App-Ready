@@ -17,7 +17,7 @@ const Message = require("./models/message");
 const initializeSocket = require("./socket-io/index.js");
 
 const cron = require("node-cron");
-const ArchivedChat = require("./models/ArchivedChat");
+const ArchivedChat = require("./models/archivedChat.js");
 const { Op } = require("sequelize");
 
 const app = express();
