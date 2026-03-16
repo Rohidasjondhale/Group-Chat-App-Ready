@@ -1,9 +1,14 @@
 const User = require("../../models/user");
 
 function chatHandler(io, socket) {
+
   socket.on("sendMessage", async (data) => {
+
     try {
-      const user = await User.findByPk(socket.userId || data.userId);
+
+      const { message, userId, roomId } = data;
+
+      const user = await User.findByPk(userId);
 
       if (!user) {
         console.log("User not found");
@@ -11,17 +16,26 @@ function chatHandler(io, socket) {
       }
 
       const messageData = {
-        message: data.message,
-        userId: socket.userId || data.userId,
+        message: message,
+        userId: userId,
         name: user.name
       };
 
-      io.emit("receiveMessage", messageData);
+      // send only to room
+      if (roomId) {
+        io.to(roomId).emit("receiveMessage", messageData);
+      } else {
+        io.emit("receiveMessage", messageData);
+      }
 
     } catch (err) {
-      console.log(err);
+
+      console.log("Chat error:", err);
+
     }
+
   });
+
 }
 
 module.exports = chatHandler;
