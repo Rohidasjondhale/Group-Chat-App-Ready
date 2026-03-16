@@ -160,6 +160,98 @@ async function send(){
 }
 
 
+
+
+async function send(){
+
+  const input = document.getElementById("messageInput");
+  const fileInput = document.getElementById("mediaFile");
+
+  const message = input.value.trim();
+  const file = fileInput.files[0];
+
+  let finalMessage = message;
+
+  /* FILE UPLOAD */
+
+  if(file){
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("https://group-chat-app-ready.onrender.com/upload-media",{
+      method:"POST",
+      body:formData
+    });
+
+    const data = await res.json();
+
+    finalMessage = data.url;
+
+    fileInput.value="";
+
+  }
+
+  if(!finalMessage){
+    alert("Enter message or upload file");
+    return;
+  }
+
+  const messageData = {
+    senderId: myUserId,
+    senderName: myName,
+    message: finalMessage
+  };
+
+  if(currentGroup){
+
+    messageData.groupId = currentGroup;
+    socket.emit("group_message", messageData);
+
+  }
+
+  else if(currentRoom){
+
+    messageData.roomId = currentRoom;
+    socket.emit("new_message", messageData);
+
+  }
+
+  else{
+
+    alert("Join group or chat first");
+    return;
+
+  }
+
+  input.value="";
+
+}
+
+
+
+function showSuggestions(words){
+
+  const box = document.getElementById("suggestions");
+
+  box.innerHTML = "";
+
+  words.forEach(word => {
+
+    const btn = document.createElement("button");
+
+    btn.innerText = word;
+
+    btn.onclick = () => {
+      document.getElementById("messageInput").value += " " + word;
+    };
+
+    box.appendChild(btn);
+
+  });
+
+}
+
 /* DISPLAY MESSAGE */
 
 function displayMessage(data){
