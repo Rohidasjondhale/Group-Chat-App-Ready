@@ -6,36 +6,73 @@ const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash"
 });
 
-async function generateSuggestions(message) {
-
-  const prompt = `
-  Suggest 3 short chat replies for this message:
-  "${message}"
-
-  Return only the replies in JSON format like:
-  ["reply1","reply2","reply3"]
-  `;
-
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-
-  return JSON.parse(text);
+function cleanJSON(text){
+  return text
+    .replace(/```json/g,"")
+    .replace(/```/g,"")
+    .trim();
 }
 
-async function predictiveText(text) {
+async function generateSuggestions(message){
 
-  const prompt = `
-  Predict the next word or phrase for this message:
-  "${text}"
+  try{
 
-  Return 3 short suggestions as JSON:
-  ["suggestion1","suggestion2","suggestion3"]
-  `;
+    const prompt = `
+Suggest 3 short chat replies for this message:
+"${message}"
 
-  const result = await model.generateContent(prompt);
-  const response = result.response.text();
+Return only JSON:
+["reply1","reply2","reply3"]
+`;
 
-  return JSON.parse(response);
+    const result = await model.generateContent(prompt);
+
+    let text = result.response.text();
+
+    text = cleanJSON(text);
+
+    return JSON.parse(text);
+
+  }
+  catch(err){
+
+    console.log("Gemini error:", err);
+
+    return ["Okay","Sounds good","I'll check"];
+
+  }
+
+}
+
+async function predictiveText(text){
+
+  try{
+
+    const prompt = `
+Predict next words for this chat:
+"${text}"
+
+Return JSON:
+["suggestion1","suggestion2","suggestion3"]
+`;
+
+    const result = await model.generateContent(prompt);
+
+    let response = result.response.text();
+
+    response = cleanJSON(response);
+
+    return JSON.parse(response);
+
+  }
+  catch(err){
+
+    console.log("Gemini error:", err);
+
+    return [];
+
+  }
+
 }
 
 module.exports = {
