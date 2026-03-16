@@ -57,8 +57,9 @@ User.hasMany(Message);
 Message.belongsTo(User);
 
 const app = express();
-app.use("/ai", require("./routes/aiRoutes"));
+const aiRoutes = require("./routes/aiRoutes");
 
+app.use("/ai", aiRoutes);
 
 app.use(cors());
 app.use(express.json());
