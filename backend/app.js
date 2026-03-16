@@ -9,7 +9,7 @@ const sequelize = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
-const aiRoutes = require("./routes/aiRoutes");
+const aiRoutes = require("./routes/aiRoutes.js");
 
 const User = require("./models/user");
 const Message = require("./models/message");
