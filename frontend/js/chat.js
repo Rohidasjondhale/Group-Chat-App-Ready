@@ -3,6 +3,8 @@ const myUserId = localStorage.getItem("userId");
 const myName = localStorage.getItem("name");
 const myEmail = localStorage.getItem("email");
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 const socket = io("https://group-chat-app-ready.onrender.com", {
   auth: { token }
 });
@@ -21,14 +23,13 @@ let currentRoom = "";
 
 //JOIN GROUP
 
-function joinGroup() {
+function joinGroup(){
 
-  const groupName = document
-    .getElementById("groupName")
-    .value
-    .trim();
+  const groupInput = document.getElementById("groupName");
 
-  if (!groupName) {
+  const groupName = groupInput.value.trim();
+
+  if(!groupName){
     alert("Enter group name");
     return;
   }
@@ -41,6 +42,8 @@ function joinGroup() {
   alert("Joined group successfully: " + groupName);
 
   console.log("Joined group:", groupName);
+
+  groupInput.value = "";
 }
 
 
@@ -62,7 +65,7 @@ async function joinRoom() {
 
   try {
 
-    const res = await fetch(`http://localhost:3000/search-user?email=${email}`);
+    const res = await fetch(`https://group-chat-app-ready.onrender.com/search-user?email=${email}`);
     const data = await res.json();
 
     if (!data.user) {
@@ -98,6 +101,32 @@ async function joinRoom() {
 async function send(){
 
   const input = document.getElementById("messageInput");
+
+input.addEventListener("input", async () => {
+
+  const text = input.value;
+
+  if(text.length < 3) return;
+
+  const res = await fetch("https://group-chat-app-ready.onrender.com/ai/predict",{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({ text })
+
+  });
+
+  const suggestions = await res.json();
+
+  showSuggestions(suggestions);
+
+});
+
+
   const fileInput = document.getElementById("mediaFile");
 
   const message = input.value.trim();
@@ -111,7 +140,7 @@ async function send(){
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("http://localhost:3000/upload-media",{
+    const res = await fetch("https://group-chat-app-ready.onrender.com/upload-media",{
       method:"POST",
       body:formData
     });
@@ -228,7 +257,27 @@ function showFileName(){
 
 }
 
+function showSuggestions(words){
 
+  const box = document.getElementById("suggestions");
+
+  box.innerHTML = "";
+
+  words.forEach(word => {
+
+    const btn = document.createElement("button");
+
+    btn.innerText = word;
+
+    btn.onclick = () => {
+      document.getElementById("messageInput").value += " " + word;
+    };
+
+    box.appendChild(btn);
+
+  });
+
+}
 
 
 document

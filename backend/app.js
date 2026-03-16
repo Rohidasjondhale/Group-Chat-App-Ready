@@ -18,7 +18,7 @@ const initializeSocket = require("./socket-io");
 
 
 const cron = require("node-cron");
-const ArchivedChat = require("./models/archivedChat");
+const ArchivedChat = require("./models/ArchivedChat");
 const { Op } = require("sequelize");
 
 cron.schedule("0 0 * * *", async () => {
@@ -57,6 +57,8 @@ User.hasMany(Message);
 Message.belongsTo(User);
 
 const app = express();
+app.use("/ai", require("./routes/aiRoutes"));
+
 
 app.use(cors());
 app.use(express.json());
