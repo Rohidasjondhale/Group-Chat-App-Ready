@@ -26,7 +26,6 @@ let currentRoom = "";
 function joinGroup(){
 
   const groupInput = document.getElementById("groupName");
-
   const groupName = groupInput.value.trim();
 
   if(!groupName){
