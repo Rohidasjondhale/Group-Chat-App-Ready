@@ -14,7 +14,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const User = require("./models/user");
 const Message = require("./models/message");
 
-const initializeSocket = require("./socket-io");
+const initializeSocket = require("./socket-io/index.js");
 
 const cron = require("node-cron");
 const ArchivedChat = require("./models/ArchivedChat");
